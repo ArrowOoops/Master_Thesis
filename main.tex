@@ -1,0 +1,58 @@
+% !TeX encoding = UTF-8
+% !TeX program = xelatex
+% !TeX spellcheck = en_US
+
+\documentclass[degree=master]{ustcthesis}
+% degree      = doctor | master | bachelor
+% degree-type = academic | professional
+% language    = chinese | english
+% fontset     = windows | mac | ubuntu | fandol
+
+% 加载宏包、全部的配置
+\input{ustcsetup.tex}
+
+
+\begin{document}
+	
+\let\cleardoublepage\clearpage
+\maketitle
+\let\cleardoublepage\clearpage
+\copyrightpage
+\let\cleardoublepage\clearpage
+\frontmatter
+\let\cleardoublepage\clearpage
+\input{chapters/abstract.tex}
+\let\cleardoublepage\clearpage
+\tableofcontents
+\let\cleardoublepage\clearpage
+\listoffigures
+\let\cleardoublepage\clearpage
+\listoftables
+\let\cleardoublepage\clearpage
+%\input{chapters/notation.tex}
+\let\cleardoublepage\clearpage
+
+\mainmatter
+\let\cleardoublepage\clearpage
+\input{chapters/chap1.tex}
+\input{chapters/chap2.tex}
+\input{chapters/chap3.tex}
+\input{chapters/chap4.tex}
+\input{chapters/chap5.tex}
+\input{chapters/chap6.tex}
+%\input{chapters/intro.tex}
+%\input{chapters/floats.tex}
+%\input{chapters/math.tex}
+%\input{chapters/citations.tex}
+
+\bibliography{bib/ustc}  % 参考文献使用 BibTeX 编译
+% \printbibliography       % 参考文献使用 BibLaTeX 编译
+
+\appendix
+%\input{chapters/complementary.tex}
+
+\backmatter
+\input{chapters/acknowledgements.tex}
+\input{chapters/publications.tex}
+
+\end{document}
