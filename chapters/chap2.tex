@@ -60,7 +60,7 @@
 	
 	假设有 $n$ 个参与者，分别为 $P_1, P_2, ..., P_n$，他们各自持有输入 $x_1, x_2, ..., x_n$，并希望在不泄露私密输入的情况下计算某个函数 $f(x_1, x_2, ..., x_n)$。多方安全计算协议（MPC）是指在参与者之间进行的一系列通信和计算过程，使得每个参与者最终可以获得函数 $f$ 的输出，同时不会泄露任何其他参与者的输入。
 	\item [2)]
-	隐私性。任何多方安全计算协议参与方不能获得除协议规定内的额外信息。具体而言，对于参与者$p_k\in P(p_1, p_2, \dots, p_n)$，使用参与者数据$F=(f_1, f_2, \dots, f_n)$输出结果为$L$的多方安全计算协议$M$，存在一个可忽略的函数$\epsilon$，有下式成立：
+	隐私性。任何多方安全计算协议参与方不能获得除协议规定内的额外信息。具体而言，所有参与方$P=(p_1, p_2, \dots, p_n)$，对于参与者$p_k\in P$，使用参与者数据$F=(f_1, f_2, \dots, f_n)$输出结果为$L$的多方安全计算协议$M$，存在一个可忽略的函数$\epsilon$，有下式成立：
 	$$P_{p_k}(f_{i,i\neq k}|L=M(F))+P_k(f_k)\leq P(f_{i,i\neq k})+\epsilon$$
 	
 \end{itemize}
@@ -78,19 +78,19 @@
 
 现实-理想框架是一种多方安全计算安全性的形式化框架，其使用了一个包含所有安全需求的“理想世界”，通过现实世界与理想世界之间的对应关系定义多方案去计算。
 
-理想世界中，参与方$P(p_1, p_2, \dots, p_n)$将各自的输入$F=(f_1, f_2, \dots, f_n)$发送给一个可信第三方$S$，$S$执行函数$Q$，并将计算结果$Q(F)$返回给所有参与方。假设存在一个在理想世界中的攻击者$A$，其可以控制除参与方其$p_k$外任意数量的参与方$P_A\subset P,p_k\notin P_A$，它试图通过各种攻击手段获取$p_k$的输入。由于攻击者$A$无法控制可信第三方$S$，因此攻击者$A$无法获得除$Q(F)$外的任何信息。
+理想世界中，参与方$P(p_1, p_2, \dots, p_n)$将各自的输入$F=(f_1, f_2, \dots, f_n)$发送给一个可信第三方$S$，$S$执行函数$Q$，并将计算结果$Q(F)$返回给所有参与方。假设存在一个在理想世界中的攻击者$A$，其可以控制除参与方其$p_k$外任意数量的参与方$P_A\subset P$其中$p_k\notin P_A$，它试图通过各种攻击手段获取$p_k$的输入。由于攻击者$A$无法控制可信第三方$S$，因此攻击者$A$无法获得除$Q(F)$外的任何信息。
 
 由于现实世界中不存在上述可信第三方$S$，各参与方需要相互交互以完成计算。在参与方$p_i$以其隐私输入$f_i$、当前状态的中间值$h_i$、接收到的所有信息$Context$、随机数$R_i$、安全性参数$\kappa$作为输入时，通过执行函数$\pi_i$，获得新的中间值或者输出。
 
 如果攻击者在现实世界达到的攻击效果与其在理想世界的攻击效果相同，那么可以将该协议认为是在现实世界中安全的，即协议使得其在现实世界中提供的安全性与在理想世界中提供的安全性等价。
 
 \begin{definition}{}
-	记$\pi$为一个协议，$Q$为一个函数，$P_A$为被攻击者$A$控制的参与方集合，$Sim$为仿真算法，定义如下两种协议。
+	记$\pi$为一个协议，$Q$为一个函数，$P_A$为被攻击者$A$控制的参与方集合，$\text{Sim}$为仿真算法，定义如下两种协议。
 	\begin{itemize}
 		\item [$\cdot$]
-			$Real_\pi(\kappa,P_A;f_1,f_2,\cdots,f_n)$：在安全性参数$\kappa$下参与方$P(p_1, p_2, \dots, p_n)$使用各自隐私数据入$F=(f_1, f_2, \dots, f_n)$在真实世界执行的协议。记$V={v_1, v_2, \dots, v_n}$为参与方$P$的最终视图，即$\{v_i|i\in (1,2,\cdots,n)\}$；$y={y_1, y_2, \dots, y_n}$为参与方$P$的输出结果。
+			$\text{Real}_\pi(\kappa,P_A;f_1,f_2,\cdots,f_n)$：在安全性参数$\kappa$下参与方$P=(p_1, p_2, \dots, p_n)$使用各自隐私数据入$F=(f_1, f_2, \dots, f_n)$在真实世界执行的协议。记$V={v_1, v_2, \dots, v_n}$为参与方$P$的最终视图，即$\{v_i|i\in (1,2,\cdots,n)\}$；$y={y_1, y_2, \dots, y_n}$为参与方$P$的输出结果。
 		\item [$\cdot$]
-			$Ideal_{Q,Sim}(\kappa,P_A;f_1,f_2,\cdots,f_n)$：模拟世界中在安全性参数$\kappa$下参与方$P(p_1, p_2, \dots, p_n)$使用各自隐私数据入$F=(f_1, f_2, \dots, f_n)$在仿真算法$Sim$与函数$Q$的计算下执行的协议，其输出为$Sim(P_A,\{(f_i,y_i)\in P_A\})$			
+			$\text{Ideal}_{Q,\text{Sim}}(\kappa,P_A;f_1,f_2,\cdots,f_n)$：模拟世界中在安全性参数$\kappa$下参与方$P(p_1, p_2, \dots, p_n)$使用各自隐私数据入$F=(f_1, f_2, \dots, f_n)$在仿真算法$\text{Sim}$与函数$Q$的计算下执行的协议，其输出为$\text{Sim}(P_A,\{(f_i,y_i)\in P_A\})$			
 	\end{itemize}
 
 \end{definition}
@@ -98,19 +98,19 @@
 在参与方是半诚实的假设下，其会诚实地执行协议，但可能会从接收到的信息中尝试推断更多的信息。
 
 \begin{definition}{}
-	给定协议$\pi$，$Q$为一个函数，$P_A$为被攻击者$A$控制的参与方集合，如果存在一个为仿真算法$Sim$，对于攻击者$A$控制的所有参与方集合$P_A$以及所有的输入$F=(f_1, f_2, \dots, f_n)$，概率分布$Real_\pi(\kappa,P_A;f_1,f_2,\cdots,f_n)$与$Ideal_{Q,Sim}(\kappa,P_A;f_1,f_2,\cdots,f_n)$在$\kappa$下不可区分，则称此协议在半诚实攻击者的攻击下安全地实现了函数$Q$。
+	给定协议$\pi$，$Q$为一个函数，$P_A$为被攻击者$A$控制的参与方集合，如果存在一个为仿真算法$\text{Sim}$，对于攻击者$A$控制的所有参与方集合$P_A$以及所有的输入$F=(f_1, f_2, \dots, f_n)$，概率分布$Real_\pi(\kappa,P_A;f_1,f_2,\cdots,f_n)$与$\text{Ideal}_{Q,\text{Sim}}(\kappa,P_A;f_1,f_2,\cdots,f_n)$在$\kappa$下不可区分，则称此协议在半诚实攻击者的攻击下安全地实现了函数$Q$。
 \end{definition}
 
-在参与方是恶意的假设下，其不仅会从接收到的信息中尝试推断更多的信息，而且还可以任意破坏、偏离协议。这里使用A表示攻击程序，用Corr(A)表示被现实世界中的攻击者攻陷的参与方集合，用Corr(Sim)表示被理想世界中的攻击者Sim攻陷的参与方集合。与上述半诚实安全性的方式类似，定义现实世界与理想世界下的概率分布：
+在参与方是恶意的假设下，其不仅会从接收到的信息中尝试推断更多的信息，而且还可以任意破坏、偏离协议。这里使用A表示攻击程序，用Corr($A$)表示被现实世界中的攻击者攻陷的参与方集合，用Corr(Sim)表示被理想世界中的攻击者Sim攻陷的参与方集合。与上述半诚实安全性的方式类似，定义现实世界与理想世界下的概率分布：
 \begin{itemize}
 	\item [$\cdot$]
-	$Real_{\pi,A}(\kappa;\{x_i|i\notin Corr(A)\})$：在安全性参数$\kappa$下，未被攻陷的参与方城市地使用给定的隐私输入执行协议，而被攻陷的参与方Corr(A)的信息可以由A进行篡改，并参与到后续的协议执行过程中。记$v_i$为参与方的最终视图，即$\{v_i|i\in Corr(A)\}$；$y_i$为诚实参与方$p_i$的输出结果，即$\{y_i|i\notin Corr(A)\}$。
+	$\text{Real}_{\pi,A}(\kappa;\{x_i|i\notin \text{Corr}(A)\})$：在安全性参数$\kappa$下，未被攻陷的参与方城市地使用给定的隐私输入执行协议，而被攻陷的参与方Corr(A)的信息可以由A进行篡改，并参与到后续的协议执行过程中。记$v_i$为参与方的最终视图，即$\{v_i|i\in \text{Corr}(A)\}$；$y_i$为诚实参与方$p_i$的输出结果，即$\{y_i|i\notin \text{Corr}(A)\}$。
 	\item [$\cdot$]
-	$Ideal_{Q,Sim}(\kappa;\{x_i|i\notin Corr(A)\})$：模拟世界中，在安全性参数$\kappa$下，在包含攻陷方输入$\{x_i|i\in Corr(A)\}$的数据上执行$Sim$协议。计算$(y_1,\cdots,y_n)\leftarrow Q(f_1,\cdots,f_n)$后，将$\{y_i|i\notin Corr(A)\}$发送给$Sim$。记$V^*$为$Sim$最终输出，即各参与方的仿真视图集合。
+	$\text{Ideal}_{Q,\text{Sim}}(\kappa;\{x_i|i\notin \text{Corr}(A)\})$：模拟世界中，在安全性参数$\kappa$下，在包含攻陷方输入$\{x_i|i\in \text{Corr}(A)\}$的数据上执行$\text{Sim}$协议。计算$(y_1,\cdots,y_n)\leftarrow Q(f_1,\cdots,f_n)$后，将$\{y_i|i\notin \text{Corr}(A)\}$发送给$\text{Sim}$。记$V^*$为$\text{Sim}$最终输出，即各参与方的仿真视图集合。
 \end{itemize}
 
 \begin{definition}{}
-	给定协议$\pi$与函数$Q$，对任意一个现实世界中的攻击者$A$，存在一个满足$Corr(A)\Longleftrightarrow Corr(Sim)$的仿真者$Sim$，使得对于诚实参与方的所有输入$\{x_i|i\notin Corr(A)\}$，概率分布$Real_{\pi,A}(\kappa;\{x_i|i\notin Corr(A)\})$与$Ideal_{Q,Sim}(\kappa;\{x_i|i\notin Corr(A)\})$在$\kappa$下不可区分，则称此协议在恶意攻击者的攻击下安全地实现了函数$Q$。
+	给定协议$\pi$与函数$Q$，对任意一个现实世界中的攻击者$A$，存在一个满足$\text{Corr}(A)\Longleftrightarrow \text{Corr}(\text{Sim})$的仿真者$\text{Sim}$，使得对于诚实参与方的所有输入$\{x_i|i\notin \text{Corr}(A)\}$，概率分布$\text{Real}_{\pi,A}(\kappa;\{x_i|i\notin \text{Corr}(A)\})$与$\text{Ideal}_{Q,\text{Sim}}(\kappa;\{x_i|i\notin \text{Corr}(A)\})$在$\kappa$下不可区分，则称此协议在恶意攻击者的攻击下安全地实现了函数$Q$。
 \end{definition}
 
 \section{差分隐私}
@@ -141,7 +141,7 @@
 	（$\epsilon$-差分隐私\cite{dwork2006our}）对于任意近邻数据集$D$与$D'$以及任意的输出结果$S$，若随机算法$M$满足
 	\begin{equation}
 		\label{eps-dp}
-		\Pr[\mathcal{M}(D) = S] \leq e^{\epsilon} \cdot \Pr[\mathcal{M}(D') = S]
+		\mathop{Pr}[\mathcal{M}(D) = S] \leq e^{\epsilon} \cdot \mathop{Pr}[\mathcal{M}(D') = S]
 	\end{equation}
 	则称$M$满足$\epsilon$-差分隐私。其中$\epsilon$表示隐私预算，它是衡量隐私保护程度的指标，$\epsilon$越小表示算法的隐私保护程度越高，反之$\epsilon$越大，算法在近邻数据集的结果之间的差别也越大，隐私保护程度便越低。
 \end{definition}
@@ -152,7 +152,7 @@
 	（$(\epsilon, \delta)$-差分隐私\cite{Algorithmic_Foundations_of_DP}）对于任意近邻数据集$D$与$D'$以及任意的输出结果$S$，若随机算法$M$满足
 	\begin{equation}
 		\label{eps-delta-dp}
-		\Pr[\mathcal{M}(D) = S] \leq e^{\epsilon} \cdot \Pr[\mathcal{M}(D') = S] + \delta
+		\mathop{Pr}[\mathcal{M}(D) = S] \leq e^{\epsilon} \cdot \mathop{Pr}[\mathcal{M}(D') = S] + \delta
 	\end{equation}
 	则称$M$满足$(\epsilon, \delta)$-差分隐私。其中$\epsilon$同样表示隐私预算，而$\delta$为一个概率，算法在$1-\delta$的概率下满足式（\ref{eps-dp}），即只有至多$\delta$的概率不满足式（\ref{eps-dp}），这便要求$\delta$值很小，在数据集样本为$n$的情况下\cite{Mechanism_DP}，需要$\delta<\frac{1}{n}$。$\epsilon$-差分隐私可以被视为$\delta=0$的$(\epsilon, \delta)$-差分隐私。
 \end{definition}
@@ -174,9 +174,9 @@
 \begin{proof}
 	对于$\forall S\in Range(M_2)$，记$Y=\{y|M_2(y)=S\}$，则
 	\begin{align}
-	Pr[M_2(M_1(D))=S]&=Pr[M_1(D)\in Y]\notag\\
-	&\leq e^\epsilon Pr[M_1(D')\in Y]+\delta\notag\\
-	&=Pr[M_2(M_1(D'))=S]+\delta\notag
+	\mathop{Pr}[M_2(M_1(D))=S]&=\mathop{Pr}[M_1(D)\in Y]\notag\\
+	&\leq e^\epsilon \mathop{Pr}[M_1(D')\in Y]+\delta\notag\\
+	&=\mathop{Pr}[M_2(M_1(D'))=S]+\delta\notag
 	\end{align}
 \end{proof}
 
@@ -188,7 +188,7 @@
 
 \begin{theorem}
 	若随机算法$M_i$满足$(\epsilon, \delta)$-差分隐私，其中$i=\{1,2,\cdots,n\}$，则算法$M(D)=(M_1(D),M_2(D,\cdots,M_n(D)))$满足$(\epsilon', n\delta+\delta')$-差分隐私\cite{Algorithmic_Foundations_of_DP}。其中
-		$$\epsilon'=\sqrt{2nln(\frac{1}{\delta'})+n\epsilon(e^\epsilon-1)}$$
+		$$\epsilon'=\sqrt{2n\ln(\frac{1}{\delta'})+n\epsilon(e^\epsilon-1)}$$
 \end{theorem}
 
 
@@ -224,12 +224,12 @@
 \begin{definition}
 	（拉普拉斯分布）均值为0，方差为$d$的拉普拉斯概率密度函数为：
 	\begin{equation}
-		Laplace(x, d)=\frac{1}{2d}exp(-\frac{|x|}{d})
+		\text{Laplace}(x, d)=\frac{1}{2d}exp(-\frac{|x|}{d})
 	\end{equation}
 \end{definition}
 
 \begin{theorem}
-	（拉普拉斯机制\cite{dwork2006calibrating}）对于任意函数$f$，其L1全局敏感度为$\Delta_1f$，算法$M=f(D)+Laplace(\frac{\Delta_1f}{\epsilon})$满足$\epsilon$-差分隐私。
+	（拉普拉斯机制\cite{dwork2006calibrating}）对于任意函数$f$，其L1全局敏感度为$\Delta_1f$，算法$M=f(D)+\text{Laplace}(\frac{\Delta_1f}{\epsilon})$满足$\epsilon$-差分隐私。
 \end{theorem}
 
 （2）高斯机制
@@ -266,7 +266,7 @@ $$ p_i = \frac{\exp(\epsilon s_i)}{\sum_{j=1}^{n}\exp(\epsilon s_j)} $$
 \begin{theorem}
 	（指数机制\cite{mcsherry2007mechanism}）可用性函数$u$对算法$M$在数据集$D$上的任何输出数值$y$给出一个可用性评估值$u(D,y)\in R$，若算法$M$输出结果$y$的概率正比于$exp(\frac{\epsilon u(D,y)}{2\delta u})$，即
 	\begin{equation}
-		Pr[M(D)=y]=\frac{exp(\frac{\epsilon u(D,y)}{2\delta u})}{\sum_{y'\in Y}exp(\frac{\epsilon u(D,y')}{2\delta u})}
+		\mathop{Pr}[M(D)=y]=\frac{exp(\frac{\epsilon u(D,y)}{2\delta u})}{\sum_{y'\in Y}exp(\frac{\epsilon u(D,y')}{2\delta u})}
 	\end{equation}
 其中$\Delta u = max_{\{\forall y, D, D'\}}|u(D,y)-u(D',y)|$，则算法$M$满足$\epsilon$-差分隐私。
 \end{theorem}
@@ -284,7 +284,7 @@ Intel SGX（Software Guard Extensions）是英特尔公司推出的一种可信�
 \begin{figure}[h]
 	\centering
 	%\includegraphics[width=1\textwidth]{figures/Transformer_Structure.png}sep_exeEncalveE
-	\includegraphics[width=0.5\linewidth]{figures/SGX_Program.png}
+	\includegraphics[width=0.6\linewidth]{figures/SGX_Program.png}
 	\caption{SGX应用程序划分与执行流程}
 	\label{SGX_Program}
 \end{figure}

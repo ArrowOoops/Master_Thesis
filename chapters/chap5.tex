@@ -84,6 +84,14 @@ $$L(θ)=-∑_{t=1}^{|D|} ∑_{i=1}^{n_t} log p_\theta (x_i^t |x_{<i}^t)$$
 
 %本节介绍针对训练阶段的选择差分隐私优化器。使用选择差分隐私机制的相关工作\cite{selectivedp}仅在RNN式的语言模型上实施。RNN式的模型按照token出现的顺序从前往后滑动处理，这种情况下隐私tokens与非隐私token分开处理较容易，而由于基于Transformer结构的模型所有tokens时并行处理的，因此无法直接将研究工作\cite{selectivedp}中的RNN式的处理方法用在基于Transformer的模型上。下面引入本节针对训练阶段的选择差分隐私优化器的介绍。
 
+\begin{figure}[h]
+	\centering
+	%\includegraphics[width=1\textwidth]{figures/Transformer_Structure.png}
+	\includegraphics[width=0.7\linewidth]{figures/SDP_Optim.png}
+	\caption{差分隐私训练优化器}
+	\label{SDP_Optim}
+\end{figure}
+
 本节介绍针对训练阶段的选择性差分隐私优化器。虽然使用选择性差分隐私机制的相关工作\cite{selectivedp}已在RNN式的语言模型上实施，但RNN式的模型按照token出现的顺序从前往后滑动处理，这种情况下较容易分开处理隐私tokens与非隐私tokens。而基于Transformer结构的模型中，所有tokens是并行处理的，因此无法直接将研究工作\cite{selectivedp}中的RNN式处理方法应用于基于Transformer的模型。接下来，本部分将详细介绍针对训练阶段的选择性差分隐私优化器。
 
 %如图\ref{SDP_Optim}和算法\ref{Algrithm_SDP_Optim}所示，用于训练基于Transformer（下文表示为Model）的语言模型，实现S-DP。其基本思路是先用策略函数确定私有属性，然后确定哪些模型变量与私有属性相关，最后对非私有变量应用常规Optimizer，对私有变量应用DP-Optimizer，如图\ref{SDP_Optim}所示。
@@ -92,18 +100,14 @@ $$L(θ)=-∑_{t=1}^{|D|} ∑_{i=1}^{n_t} log p_\theta (x_i^t |x_{<i}^t)$$
 
 这里需要首先确定与私有tokens相关的变量。Model使用一个隐藏状态$h_i$对上下文进行编码，输出在词表$V$上的一个分布$p_i$。如果$x_i$是私有的，那么$h_i$、$p_i$和$L_i$都是私有的。
 
+算法\ref{Algrithm_SDP_Optim}概述了DP-Optimizer中的步骤。给定一个数据集$D$，我们应用一个策略函数$F$来获得一个比特矩阵$P=F(D)$，表示哪些tokens是私有的。在每一步，我们取一个随机batch $B$，并使用$P$将$B$拆分成一个非私有和私有元组的序列${(B_{np,i},B_{p,i})}$;然后我们在$B_{p,i}$上应用Optimizer (常规更新)，在$B_{p,i}$上应用DP-Optimizer (隐私更新)，交替进行，以更新和保护隐私。注意，除了梯度中的噪声，如果隐藏状态$h_i$是私有的，我们还对其裁剪和添加噪声。原因是在LM中，如果$x_i$是私有的，$h_i$也包含私有信息(如图\ref{SDP_Optim}所示)，并且直接传递给下一个常规更新步骤，无法被梯度中的噪声保护。所以在$h_i$中加入噪声来保护隐私信息是很重要的。由于DP-Optimizer对梯度增加了噪声，用于计算损失的$L$和$p_i$被梯度中的噪声保护。这样一来，所有的私有变量都得到了保护。
+
+
 %$$h_i=Model(h_{i-1},x_i)$$
 %$$p_i=p_\theta(V|x_{<i})=Softmax(g(h_i))$$
 %$$L_i=-log p_\theta(x_{i+1}|x_{<i+1})$$
 
 
-\begin{figure}[h]
-	\centering
-	%\includegraphics[width=1\textwidth]{figures/Transformer_Structure.png}
-	\includegraphics[width=0.7\linewidth]{figures/SDP_Optim.png}
-	\caption{差分隐私训练优化器}
-	\label{SDP_Optim}
-\end{figure}
 
 
 %\begin{algorithm}[H]
@@ -180,28 +184,28 @@ $$L(θ)=-∑_{t=1}^{|D|} ∑_{i=1}^{n_t} log p_\theta (x_i^t |x_{<i}^t)$$
 		%记Batch\_input[i]中第$j$个句子的内容Batch\_input[i][j]为Sen
 		
 		\For{$k = 1, 2, \dots, len(Sen)$}{
-			记$\rm Batch\_input[i]$的第$j$个句子$\rm Batch\_input[i][j]$为$x$
+			记$Batch\_input[i]$的第$j$个句子$Batch\_input[i][j]$为$x$
 			
-			使用隐私矩阵$\rm P=F(input)$将$B$中的数据拆分成非隐私元组与隐私元组：$\rm \{(M_{np}, M_{p})\}$
+			使用隐私矩阵$P=F(input)$将$B$中的数据拆分成非隐私元组与隐私元组：$\{(M_{np}, M_{p})\}$
 			
-			$\rm E = Token\_Embedding(x)$
+			$ E = \text{Token\_Embedding}(x)$
 			
-			$\rm Out\_E = Encoder(E)$
+			$ Out\_E = \text{Encoder}(E)$
 			
-			\For{$\rm x_k\in M_{p}$}{
+			\For{$x_k\in M_{p}$}{
 
 				$Out\_E_{p}\leftarrow Out\_E_{p} / max(1, \frac{\Vert Out\_E \Vert_2}{C})$
 
 				$Out\_E_{p} \leftarrow Out\_E_{p} + \sigma C\cdot N(0, I)$
 			}
 
-			$\rm Logits[j] = Vocab\_Projection(Out\_E[-1])$
+			$Logits[j] = \text{Vocab\_Projection}(Out\_E[-1])$
 			
 		}
 		
 		\For{$k = 1, 2, \dots, len(Sen) - 1$}{			
 			%$Loss[k] = L(Logits[k], x[k + 1])$
-			\If{$\rm k\in M_{p}$}{
+			\If{$ k\in M_{p}$}{
 			%\For{$\rm k\in M_{p}$}
 				$g(k) \leftarrow \nabla_\theta L(\theta, Logits[k], x[k + 1])$
 				
@@ -219,11 +223,10 @@ $$L(θ)=-∑_{t=1}^{|D|} ∑_{i=1}^{n_t} log p_\theta (x_i^t |x_{<i}^t)$$
 	\label{Algrithm_SDP_Optim}
 \end{algorithm}
 
-算法\ref{Algrithm_SDP_Optim}概述了DP-Optimizer中的步骤。给定一个数据集$D$，我们应用一个策略函数$F$来获得一个比特矩阵$P=F(D)$，表示哪些tokens是私有的。在每一步，我们取一个随机batch $B$，并使用$P$将$B$拆分成一个非私有和私有元组的序列${(B_{np,i},B_{p,i})}$;然后我们在$B_{p,i}$上应用Optimizer (常规更新)，在$B_{p,i}$上应用DP-Optimizer (隐私更新)，交替进行，以更新和保护隐私。注意，除了梯度中的噪声，如果隐藏状态$h_i$是私有的，我们还对其裁剪和添加噪声。原因是在LM中，如果$x_i$是私有的，$h_i$也包含私有信息(如上所示)，并且直接传递给下一个常规更新步骤，无法被梯度中的噪声保护。所以在$h_i$中加入噪声来保护隐私信息是很重要的。由于DP-Optimizer对梯度增加了噪声，用于计算损失的$L$和$p_i$被梯度中的噪声保护。这样一来，所有的私有变量都得到了保护。
-
 
 \subsection{针对推断阶段的选择差分隐私解码算法}
 
+如图\ref{Chap5_PDP_Decode}与算法\ref{Algrithm_SDP_Decoding}概述了针对推断阶段的解码算法。由于该场景下训练阶段使用原始包含隐私内容的数据集进行训练，在推断阶段时，为保护隐私内容，需要对生成结果进行处理。具体来说，在生成输出的过程中，使用策略函数$F$对已生成的内容与当前模型输出的下一个Token进行判断，若属于隐私内容，则对Logits进行裁剪并加上由隐私预算与裁剪上界确定的高斯噪声，并重新经过分词器解码得到新的Token。
 
 \begin{figure}[h]
 	\centering
@@ -232,6 +235,12 @@ $$L(θ)=-∑_{t=1}^{|D|} ∑_{i=1}^{n_t} log p_\theta (x_i^t |x_{<i}^t)$$
 	\caption{差分隐私解码算法}
 	\label{Chap5_PDP_Decode}
 \end{figure}
+
+%这里对于Logits的处理需要重点关注。由于最终确定下一个Token位于词表上的哪一个的时候使用的是Softmax(Logits)，而Softmax函数不改变最大值的位置，因此选择argmax(Softmax(Logits))与argmax(Logits)的结果相同。由于Softmax($\cdot$)$\in (0, 1)$，即Softmax(Logits)输出的结果在0到1之间，有界，然而Logits$\in R$无界，因此需要对Logits进行处理以满足有界的差分隐私全局敏感度。这里，本节使用归一化处理将Logits限制在0到1之间。具体来说，对于$l_i \in Logits$，$l_i'=\frac{l_i-l_min}{l_max-l_min}$。这样，$l_i'$满足$l_i'\in [0,1]$，即这里全局敏感度$C=1$。
+
+在文本生成任务中，生成的下一个单词通常是通过计算Logits值，再使用Softmax函数将Logits转化为概率分布来确定的。在差分隐私的场景下，需要对Logits进行处理以满足有界的全局敏感度。具体地，我们采用归一化处理将Logits限制在0到1之间。对于每个Logit $l_i$，我们计算其归一化后的值 $l_i' = \frac{l_i - l_{\text{min}}}{l_{\text{max}} - l_{\text{min}}}$，其中 $l_{\text{min}}$ 和 $l_{\text{max}}$ 分别是Logits中的最小值和最大值。这样，归一化后的Logits $l_i'$ 满足 $l_i' \in [0, 1]$，即全局敏感度 $C=1$。
+
+需要注意的是，在使用Softmax函数来确定下一个单词时，Softmax函数不改变最大值的位置，因此选择 argmax(Softmax(Logits)) 与 argmax(Logits) 的结果相同。由于 Softmax(Logits) 的输出结果在 (0, 1) 范围内，即有界，而 Logits 的取值范围是实数集，即无界，因此需要对 Logits 进行归一化处理以满足有界的差分隐私全局敏感度。
 
 
 
@@ -242,11 +251,11 @@ $$L(θ)=-∑_{t=1}^{|D|} ∑_{i=1}^{n_t} log p_\theta (x_i^t |x_{<i}^t)$$
 	\SetKwInOut{Output}{输出}
 	\Input{输入解码的前缀$P$，策略函数$F$，裁剪上界$C$、组大小$L$，模型$\rm Model$，词表$V$，分词器Tokenizer($\cdot$)}
 	
-	\Output{输入解码的前缀为Prefix时，模型的输出结果Output}
+	\Output{输入解码的前缀为$Prefix$时，模型的输出结果$Output$}
 	
 	\# 将当前生成结果记为CS，初始赋值为输入前缀
 	
-	CS = P
+	$CS = P$
 	
 %	\# PS为策略函数输出的隐私分类，初始赋值为False，即认为所有输入前缀均非敏感
 %	
@@ -254,42 +263,42 @@ $$L(θ)=-∑_{t=1}^{|D|} ∑_{i=1}^{n_t} log p_\theta (x_i^t |x_{<i}^t)$$
 	
 	\# 模型输出预测下一个Token的Logits
 	
-	NT\_Logits = Model(CS)
+	$NT\_Logits = \text{Model}(CS)$
 	
 	\# Logits确定最大概率的index，并由分词器解码成输出字符
 	
-	NT = Tokenizer.decode(argmax(Softmax(NT\_Logits)))
+	$NT = \text{Tokenizer}(\text{argmax}(\text{Softmax}(NT\_Logits)))$
 	
 	\# 若输出<EOS>符号终止流程
 	
-	\While{NT != <EOS>}{
+	\While{$NT!=\rm<EOS>$}{
 		
 		\# 若已生成内容与当前预测的下一个Token在策略函数$F$下是隐私内容，则需要加噪处理
 		
-		\If{F(CS, NT) == True}{
+		\If{$F(CS, NT) == True$}{
 			\# 对Logits进行裁剪
-			NT\_Logits $\leftarrow$ NT\_Logits / max(1, $\frac{\Vert NT\_Logits \Vert_2}{C}$)
+			$NT\_Logits \leftarrow NT\_Logits / max(1, \frac{\Vert NT\_Logits \Vert_2}{C})$
 			
 			\# 加噪
 			
-			NT\_Logits \leftarrow NT\_Logits + $\sigma C\cdot N(0, I)$
+			$NT\_Logits \leftarrow NT\_Logits + \sigma C\cdot N(0, I)$
 			
 			\# 在加噪的Logists下重新生成Token
 			
-			NT = Tokenizer.decode(argmax(Softmax(NT\_Logits)))
+			$NT = \text{Tokenizer}(\text{argmax}(\text{Softmax}(NT\_Logits)))$
 		}
 		
 		\# 将新Token加入当前生成结果CS中
 		
-		CS = CS + NT
+		$CS = CS + NT$
 		
 		\# 继续预测下一个Token的Logits
 		
-		NT\_Logits = Model(CS)
+		$NT\_Logits = \text{Model}(CS)$
 		
 		\# 由分词器对index进行解码
 		
-		NT = Tokenizer.decode(argmax(Softmax(NT\_Logits)))
+		$NT = \text{Tokenizer}(\text{argmax}(\text{Softmax}(NT\_Logits)))$
 	}
 
 	
@@ -297,7 +306,6 @@ $$L(θ)=-∑_{t=1}^{|D|} ∑_{i=1}^{n_t} log p_\theta (x_i^t |x_{<i}^t)$$
 	\label{Algrithm_SDP_Decoding}
 \end{algorithm}
 
-如图\ref{Chap5_PDP_Decode}与算法\ref{Algrithm_SDP_Decoding}概述了针对推断阶段的解码算法。由于该场景下训练阶段使用原始包含隐私内容的数据集进行训练，在推断阶段时，为保护隐私内容，需要对生成结果进行处理。具体来说，在生成输出的过程中，使用策略函数$F$对已生成的内容与当前模型输出的下一个Token进行判断，若属于隐私内容，则对Logits进行裁剪并加上由隐私预算与裁剪上界确定的高斯噪声，并重新经过分词器解码得到新的Token。
 
 \section{安全性分析}
 
