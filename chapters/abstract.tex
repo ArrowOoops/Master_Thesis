@@ -2,44 +2,89 @@
 
 \ustcsetup{
   keywords  = {自然语言处理，医学文本生成，差分隐私，多方安全计算，深度学习隐私保护},
-  keywords* = {Natural Language Processing, Medical Text Generation, Differential Privacy, Secure Multi-Party Computation, Privacy-preserving Deep Learning},
+  keywords* = {Natural Language Processing, Medical Text Generation, Differential Privacy, Multi-Party Secure Computation, Privacy-preserving Deep Learning},
 }
 
   %因此，本文针对恶意的参与者参与的训练阶段，通过引入多方安全计算（Multi-party Secure Computation, MPC）与可信硬件Intel SGX，并设计了一个安全的LM训练协议来保护训练数据以及模型的安全；同时为有效缓解语言模型的记忆问题，防止恶意攻击者通过模型反演攻击来获取训练隐私数据，本文基于差分隐私，有效的缓解了语言模型的记忆问题。具体研究内容如下：
 
 \begin{abstract}
-  医学文本生成任务指的是使用自然语言处理技术在医学场景下生成相关文本的任务。其中最广泛使用的是基于 Transformer 及其变体的语言模型。
-  
-  然而，语言模型的参数量庞大，需要大量的训练数据集才能使得医学文本生成任务的模型性能优异，但在医学领域中，单个医疗机构很难满足如此规模的数据量要求，而且各项法律法规进一步限制了医学文本数据的收集与共享。因此如何在不泄露患者与医疗机构隐私的前提下获得足够的数据量，以训练具有高表达能力的文本生成模型是一项挑战。
-  
-  此外，语言模型存在记忆问题，即模型倾向于输出训练数据，由于医学文本训练数据包含大量患者隐私信息，因此在模型训练完成后向用户提供查询服务的推断阶段，也存在泄露隐私训练数据的风险。
-  
- 
-  
-  因此，医学文本生成任务面临两个主要挑战：一是模型需要大量训练数据以达到优异性能，但医学领域中数据规模有限且受法律法规限制；二是语言模型存在记忆问题，可能导致患者隐私信息泄露。针对上述挑战，本文先对训练阶段和推断阶段的攻击进行分类，量化隐私风险。随后分别提出相应的隐私保护策略。本文的研究内容具体如下：
-  
-  首先，本文针对医学文本生成任务在训练和推断两个阶段的攻击场景进行分类，并分析了各类攻击手段对隐私安全的威胁程度。在训练阶段，考虑攻击者试图推断隐私数据并破坏训练协议的场景；在推断阶段，考虑攻击者试图恢复训练中的隐私数据的场景。这一部分研究为后续隐私保护策略的设计奠定了基础。
+	
+%	中文医学文本生成任务，特别是基于Transformer及其变体的语言模型在医学场景中的应用，对提供医疗服务和传播医疗知识具有重要价值。然而，该任务面临着两大挑战：一是难以获取足够规模的医学训练数据，二是如何在训练和推断过程中保护患者的隐私。
+%	
+%	医学领域的语言模型需要大量训练数据以确保其强大的表达能力。单个医疗机构往往难以提供如此庞大的数据集，同时法律法规的限制使得医学文本数据的收集和共享更困难。为解决这一问题，本研究提出了一种有效的解决方案：首先，利用大规模的中文预训练模型；其次，在此基础上使用无隐私风险的医学领域专业知识语料进行微调；最后，通过多方安全计算的方式丰富医学文本生成任务的训练数据。
+%	
+%	本文研究了医学文本生成任务的隐私攻击模型，并分析了各类攻击方式对隐私安全的威胁程度。在训练阶段，我们关注攻击者可能尝试推断隐私数据并破坏训练协议的情况；在推断阶段，我们关注攻击者可能试图恢复训练过程中的隐私数据的情况，并改进了攻击策略。这一部分的研究为后续隐私保护策略的设计提供了坚实的基础。
+%	
+%	在训练阶段，针对恶意攻击者可能尝试恢复训练数据或破坏训练协议的情况，本文提出了一种基于可信硬件Intel SGX的多方安全计算协议，以增强模型训练过程的安全性。该协议即使在面对恶意攻击者的情况下，仍能保证训练过程的安全，为训练医学文本生成模型提供了一种新颖的隐私保护方法。
+%	
+%	针对推断阶段的隐私保护，本文设计了两种有效的策略来缓解语言模型的记忆问题。一是在训练阶段引入一种选择差分隐私优化器，对模型的训练过程中隐私部分的损失进行加噪处理；二是在推断阶段设计一种选择差分隐私解码算法，对推断结果涉及隐私的部分进行加噪处理。这两种方法有效防止恶意攻击者获取模型的训练隐私数据，同时避免了过分牺牲模型的准确性。
+%	
+%	本研究首次对中文医学文本生成任务的隐私问题进行了全面研究，提出了针对训练和推断阶段的隐私保护策略，并通过实验验证了其有效性。这为该领域的隐私保护提供了新的视角和方法。
+
+%中文医学文本生成任务在提供医疗服务和传播医疗知识中具有显著价值，但这个任务由于其特殊性，相比普通的文本生成任务，面临着更大的挑战。首先，在隐私保护方面，医学文本生成任务的隐私保护比普通文本生成任务（如对话、翻译等）更为关键，不仅因为其数据敏感性、法律和道德考量、信任问题等，还因为医学文本中的隐私信息更易被筛选，这使得在训练阶段需要考虑更严格的场景，隐私需求更大。其次，在生成结果的要求上，由于需要保证结果的可解释性、准确性等特点，在保障隐私的前提下，不能牺牲太多的表达能力。最后，医学文本数据的规模有限，且受到严格的法律法规限制，这使得训练出高质量的语言模型面临着挑战。
+
+中文医学文本生成任务在提供医疗服务和传播医疗知识中具有显著价值，但该任务由于其特殊性，相比普通的文本生成任务面临着更大的挑战。首先，医学文本数据的规模有限，且受到严格的法律法规限制，这使得训练出该领域高质量的语言模型面临着挑战。其次，在生成结果的质量上，由于需要保证结果的可解释性、准确性等特点，在保障隐私的前提下，不能过多牺牲模型的表达能力。最后，医学文本生成任务的隐私保护比普通文本生成任务（如对话、翻译等）的隐私保护更为关键，不仅因为其数据敏感性、法律和道德考量、信任问题等，还因为医学文本中的隐私信息更易被筛选，这使得在训练阶段与推断阶段需要考虑更严格的场景，隐私需求更大。
+
+本研究针对以上问题提出了一种全新的解决方案。首先，本文利用在大规模的中文语料上训练的预训练模型作为基础，然后使用无隐私风险的医学领域专业知识语料进行微调，以增强模型在医学领域的表达能力。其次，本文通过多方安全计算的方式，使更多的参与方可以在保护隐私的前提下提供训练数据，从而进一步丰富医学文本生成任务的训练数据，有效缓解了医学数据稀缺性带来的问题。
+
+在隐私保护方面，本研究详细分析了医学文本生成任务的隐私攻击模型，及其对隐私安全的威胁程度，并面向推断阶段的模型反演攻击提出了改进的攻击手段。在训练阶段，本文设计并实现了一种面向Transformer结构的，基于可信硬件SGX的多方安全计算协议，以确保训练过程的安全性；在推断阶段，本文面向Transformer结构的模型在训练阶段设计了选择差分隐私优化器，在推断阶段设计了选择差分隐私解码算法，有效防止了恶意攻击者恢复模型的训练隐私数据，同时保证了生成结果的准确性。由于医学文本中的隐私信息更易被筛选，因此选择差分隐私在此领域的应用更具优势。此外，本文还设计了一个用于评估生成的医学文本的科学性的指标，并通过实验证明了使用选择差分隐私的模型生成的结果的科学性。
+
+本研究首次分析了中文医学文本生成任务的隐私问题，并提出了具有针对性的解决方案。这一成果不仅在理论上深化了对于医学文本生成任务隐私保护问题的理解，也在实践上为该领域的隐私保护提供了有效的策略和工具。
 
 
-  然后，本文对于训练阶段中，恶意攻击者试图恢复训练数据以及破坏训练协议的场景，基于可信硬件Intel SGX 设计了一套针对医学文本生成模型的多方安全计算协议，以提升安全性假设。该协议在面对恶意攻击者的情况下仍能保证安全性，为训练医学文本生成模型提供了一种创新的隐私保护方法。
 
 
-  最后，本文设计了两种方式来缓解语言模型的记忆问题。一方面，在训练阶段中引入一种选择性差分隐私优化器，对模型的训练过程的损失进行加噪处理；另一方面，在推断阶段中设计了一种差分隐私解码算法，对推断结果进行加噪。通过上述两种方法有效缓解语言模型的记忆问题，防止模型的训练隐私数据被恶意攻击者获取，同时避免牺牲过多精度。
+
+
+	
+%  基于语言模型的中文医学文本生成任务的隐私保护研究主要关注两种安全问题：一方面是是防止执行学习训练与推断算法的计算方访问数据或模型，若计算策略设计的不够合理，计算方可以从执行过程中恢复训练隐私数据；另一方面是是防止模型使用者从模型的推断结果恢复出部分训练数据，如根据模型参数或模型推断结果判断特定数据是否在训练集中或重建部分训练集，攻击者可以定制输入与生成策略使得模型更容易输出训练隐私数据。此外，中文医学文本生成任务还面临着训练数据少的问题。
+%  
+%  目前还未有工作研究对中文医学文本生成任务的上述安全问题进行研究，本文
+%	
+%  医学文本生成任务指的是使用自然语言处理技术在医学场景下生成相关文本的任务。其中最广泛使用的是基于 Transformer 及其变体的语言模型。
+%  
+%  然而，语言模型的参数量庞大，需要大量的训练数据才能使得用于医学文本生成任务的模型有着高表达能力，但在医学领域中，单个医疗机构很难满足如此大量的数据要求，而且各项法律法规进一步限制了医学文本数据的收集与共享。针对上述挑战，本文基于在大规模中文语料上训练的预训练模型，并在补充的无隐私风险的医学领域的医学专业知识语料上微调，在医学文本生成任务上，通过多方安全计算的方式丰富该特定领域的训练数据。
+%  
+%  %因此如何在不泄露患者与医疗机构隐私的前提下获得足够的数据量，以训练具有高表达能力的文本生成模型是一项挑战。
+%  
+%  %然而在医学领域，由于语言模型的大参数量和数据收集与共享的法规限制，获取足够的训练数据成为一大挑战。针对上述挑战，本文基于在大规模中文语料上训练的预训练模型，并在补充的无隐私风险的医学领域的医学专业知识语料上微调，在医学文本生成任务上，通过多方安全计算的方式丰富该特定领域的训练数据。
+%  
+%  此外，语言模型存在记忆问题，即模型倾向于输出训练数据，由于医学文本训练数据包含大量患者的隐私信息，因此在模型训练完成后向用户提供查询服务的推断阶段，也存在着泄露隐私训练数据的风险。针对这一问题，本文基于差分隐私设计了新颖的隐私优化器与解码算法。
+%  
+% 
+%  
+%  %因此，医学文本生成任务面临两个主要挑战：一是模型需要大量训练数据以达到优异性能，但医学领域中数据规模有限且受法律法规限制；二是语言模型存在记忆问题，可能导致患者隐私信息泄露。
+%  
+%  %针对上述挑战，本文基于在大规模中文语料上训练的预训练模型，并在补充的无隐私风险的医学领域的医学专业知识语料上微调，在医学文本生成任务上，通过多方安全计算的方式丰富该特定领域的训练数据；
+%  
+%  综上，本文主要解决两个挑战：一是在医学领域中获取大规模训练数据的难题；二是解决语言模型的记忆问题可能导致的患者隐私信息泄露。为此，本文首先对训练阶段和推断阶段的攻击进行分类，并通过实验揭示其隐私泄露风险。随后分别提出相应的隐私保护策略。本文的研究内容具体如下：
+%  
+%  首先，本文针对医学文本生成任务在训练和推断两个阶段的攻击场景进行分类，并分析了各类攻击手段对隐私安全的威胁程度。在训练阶段，考虑攻击者试图推断隐私数据并破坏训练协议的场景；在推断阶段，考虑攻击者试图恢复训练中的隐私数据的场景。这一部分研究为后续隐私保护策略的设计奠定了基础。
+%
+%
+%  然后，本文对于训练阶段中，恶意攻击者试图恢复训练数据以及破坏训练协议的场景，基于可信硬件Intel SGX 设计了一套针对医学文本生成模型的多方安全计算协议，以提升安全性假设。该协议在面对恶意攻击者的情况下仍能保证安全性，为训练医学文本生成模型提供了一种创新的隐私保护方法。
+%
+%
+%  最后，本文设计了两种方式来缓解语言模型的记忆问题。一方面，在训练阶段中引入一种选择性差分隐私优化器，对模型的训练过程的损失进行加噪处理；另一方面，在推断阶段中设计了一种差分隐私解码算法，对推断结果进行加噪。通过上述两种方法有效缓解语言模型的记忆问题，防止模型的训练隐私数据被恶意攻击者获取，同时避免牺牲过多精度。
 \end{abstract}
 
 \begin{abstract*}
-  Medical text generation tasks refer to the use of natural language processing technology to generate relevant text in the medical domain. The state-of-art models for these tasks are based on Transformer architecture and its variants.
-  
-  However, language models have large parameters, which require a substantial training dataset to achieve high performance in medical text generation tasks. In the medical field, it is challenging for individual healthcare institutions to reach such data scale requirements. Furthermore, various laws and regulations further limit the collection and sharing of medical text data. Therefore, obtaining sufficient data volume without compromising patient and healthcare institution privacy to train expressive text generation models is a challenge.
-  
-  Additionally, language models exhibit a memory problem, as they tend to output training data. Since medical text training data contains a considerable amount of patient privacy information, there is a risk of privacy data leakage during the inference stage when providing query services to users after model training.
-  
-  Thus, medical text generation tasks face two main challenges: (1) the need for a large training dataset to achieve excellent performance, but the data scale in the medical field is limited and subject to legal restrictions, and (2) the memory problem of language models, which may lead to patient privacy information leakage. In response to these challenges, this study first classifies attacks in the training and inference stages and quantifies privacy risks. Subsequently, corresponding privacy protection strategies are proposed. The research content of this research is as follows:
-  
-  First, this paper classifies attack scenarios in the training and inference stages of medical text generation tasks and analyzes the threat levels of various attack methods to security. In the training stage, the scenario of an attacker trying to infer private data and undermine the training protocol is considered; in the inference stage, the scenario of an attacker trying to recover private data from the training is considered. This research lays the foundation for the design of subsequent privacy protection strategies.
-  
-  Secondly, in the training stage, where a malicious attacker attempts to recover training data and undermine the training protocol, this paper designs a secure multi-party computation protocol for medical text generation models based on trusted hardware Intel SGX, enhancing security assumptions. This protocol can still guarantee security in the face of malicious attackers, providing an innovative privacy protection method for training medical text generation models.
-  
-  Lastly, this paper designs two approaches to mitigate the memory problem of language models. On the one hand, a selective differential privacy optimizer is introduced in the training stage to add noise to the loss of the model's training process; on the other hand, a differential privacy decoding algorithm is designed in the inference stage to add noisae to the inference results. Through these two methods, the memory problem of language models is effectively alleviated, preventing malicious attackers from obtaining the model's training privacy data while avoiding excessive loss of accuracy.
+
+%Chinese medical text generation task is significant in delivering healthcare services and disseminating medical knowledge. However, it faces greater challenges than conventional text generation tasks. Firstly, the limited scale of medical text data, compounded by stringent legal and regulatory constraints, presents a severe challenge in training high-quality language models. Secondly, the generated results must ensure interpretability and accuracy without sacrificing too much expressive capacity against privacy protection. Lastly, privacy protection in medical text-generation tasks is more critical than in regular text-generation tasks such as dialogue and translation. This is not only due to the sensitivity of the data, legal and ethical considerations but also because private information in the medical text is more easily filtered. This necessitates stricter scenarios in the training and inference stages, considering the malicious attackers.
+%
+%To address these issues, we propose a novel solution. Initially, we utilize a pre-trained model based on large-scale Chinese corpora as the foundation, followed by fine-tuning using risk-free medical knowledge corpora. This process aims at enhancing the model's expressiveness in the medical domain. Further, we employ multi-party secure computation, enabling more participants to provide training data while ensuring privacy protection. This approach effectively mitigates the challenges posed by the scarcity of medical data.
+%
+%As for privacy protection, we provide a detailed analysis of the privacy attack model in medical text generation tasks and its threat level to privacy and security. We propose improved attack methods for model inversion attacks during the inference stage. During the training stage, we design and implement a multi-party secure computation protocol for the Transformer-based model to guarantee the confidentiality of the training stage. We utilize Intel SGX to ensure the integrity of the training process. For the inference stage, we design a selective differential privacy optimizer and a selective differential privacy decoding algorithm for the Transformer-based model. This effectively prevents malicious attackers from accessing private training data while ensuring the accuracy and interpretability of the generated results. As private information in the medical text is more easily filtered, applying selective differential privacy proves advantageous in this field. Additionally, we introduce a perplexity metric - the "medical text generation scientificity index" to evaluate the scientificity and accuracy of the generated medical text. We validated this index in our experiments, demonstrating the scientific rigour of our model.
+%
+%Our thesis represents the first comprehensive investigation into the privacy issues of Chinese medical text generation tasks and proposes targeted solutions. This achievement deepens the theoretical understanding of privacy protection issues in medical text generation tasks and provides effective strategies and tools for privacy protection in this field in practice.
+
+The Chinese medical text generation task holds substantial importance in enhancing healthcare services and disseminating medical knowledge. However, it confronts distinct challenges compared with conventional text generation tasks. Firstly, the need for medical text data, compounded by stringent legal and regulatory constraints, creates a significant hurdle in training superior language models. Secondly, the generated output must ensure interpretability and accuracy while not compromising expressive capacity for privacy protection. Thirdly, privacy protection in medical text generation assumes higher criticality than routine tasks such as chat and translation. This is attributable to data sensitivity, legal and ethical considerations, and ease of filtering private information from medical text. This calls for a stricter approach during the training and inference stages to guard against potential malicious attackers.
+
+To address these issues, we present a novel solution. We begin with a pre-trained model trained from extensive Chinese corpora, followed by fine-tuning step using medical knowledge corpora. This process intends to augment the model's expressive power in the medical domain. Moreover, our strategy utilizes multi-party secure computation to allow several participants to supply training data while preserving privacy. This significantly mitigates the obstacles posed by the scarcity of medical data.
+
+We present a comprehensive analysis of the privacy attack model in medical text generation tasks to address privacy protection issues, demonstrating its threat to privacy and security. We propose an advanced attack method for the model inversion attacks during the inference stage. At the training stage, we construct and implement a multi-party secure computation protocol for the Transformer-based model to ensure training confidentiality. We deploy Intel SGX to guarantee the integrity of the training process. As for the inference stage, we address a selective differential privacy optimizer and a selective differential privacy decoding algorithm for the Transformer-based model. This deters malicious attackers from accessing or inferencing private training data, concurrently ensuring the accuracy and interpretability of the generated outcomes. Given the ease of filtering private information from medical text, deploying selective differential privacy yields considerable benefits. Furthermore, we introduce a new metric - the "medical text generation scientific index" to assess the scientific and the accuracy of the generated medical text. We validated this index through rigorous experimentation, which substantiates the scientific robustness of our model. 
+
+This thesis represents a comprehensive exploration of privacy issues on Chinese medical text generation tasks, providing novel solutions simultaneously. This accomplishment extends the theoretical comprehension of privacy protection issues in medical text generation tasks and provides practical, effective strategies and tools for privacy protection within this domain.
+
   
 \end{abstract*}
